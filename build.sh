@@ -1,7 +1,9 @@
 #!/bin/bash
 BUCKET=$1
 PROFILE=$2
-REGION=$3
+SSM_PARAM_STORE_API_KEY=$3
+REGION=$4
+
 
 echo "Installing python modules"
 cd lambda-src
@@ -20,6 +22,6 @@ aws cloudformation deploy \
     --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
     --template-file ./packaged-template.yaml \
     --stack-name trend-deep-security-events-to-datadog \
-    --parameter-overrides EventFilter=all DatadogAPIKey=GLOBAL_DATADOG_APIKEY_CFN\
+    --parameter-overrides EventFilter=all DatadogAPIKey=${SSM_PARAM_STORE_API_KEY}\
     --profile ${PROFILE} \
     --region ${REGION}

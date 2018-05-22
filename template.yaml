@@ -101,3 +101,13 @@ Resources:
               Resource:
                 - "*"
       UserName: trend_deep_security_cfn
+
+Outputs:
+  IAMUser:
+    Description: IAM user to generate credentials for to use in Deep Security
+    Value: !Ref TrendDeepSecurityUser
+
+  SNSTopicARN:
+    Description: SNS Topic ARN that must be entered in Deep Security (events will be sent here)
+    Value: !Ref eventSNSTopic
+    
