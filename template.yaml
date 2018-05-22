@@ -9,6 +9,9 @@ Parameters:
   DatadogAPIKey:
     Type : 'AWS::SSM::Parameter::Value<String>'
     Description: Parameter store parameter that contains the Datadog API key
+  DatadogAppKey:
+    Type : 'AWS::SSM::Parameter::Value<String>'
+    Description: Parameter store parameter that contains the Datadog Application key
 
 Resources:
   trendEventForwarder:
@@ -25,6 +28,7 @@ Resources:
         Variables:
           EventFilter: !Ref EventFilter
           DatadogAPIKey: !Ref DatadogAPIKey
+          DatadogAppKey: !Ref DatadogAppKey
 
   eventSNSTopic:
     Type: "AWS::SNS::Topic"
@@ -110,4 +114,3 @@ Outputs:
   SNSTopicARN:
     Description: SNS Topic ARN that must be entered in Deep Security (events will be sent here)
     Value: !Ref eventSNSTopic
-    
