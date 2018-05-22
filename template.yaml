@@ -1,0 +1,103 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: Lambda function which takes events from Deep Security and formats them for Datadog.
+
+Parameters:
+  EventFilter:
+    Type: String
+    Description: Comma seperated list of Deep Security event severities to send to Datadog (default is send all)
+  DatadogAPIKey:
+    Type : 'AWS::SSM::Parameter::Value<String>'
+    Description: Parameter store parameter that contains the Datadog API key
+
+Resources:
+  trendEventForwarder:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: lambda-function.lambda_handler
+      Runtime: python2.7
+      CodeUri: ./lambda-src
+      Description: Comma seperated list of Deep Security event severities to send to Datadog (default is send all)
+      MemorySize: 128
+      Timeout: 300
+      Role: !GetAtt ExecutionRole.Arn
+      Environment:
+        Variables:
+          EventFilter: !Ref EventFilter
+          DatadogAPIKey: !Ref DatadogAPIKey
+
+  eventSNSTopic:
+    Type: "AWS::SNS::Topic"
+    Properties:
+      DisplayName: TrendMicroDeepSecurityEvents
+      TopicName: TrendMicroDeepSecurityEvents
+
+  SubscribeLambdaToSNSTopic:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Protocol: lambda
+      Endpoint: !GetAtt trendEventForwarder.Arn
+      TopicArn: !Ref eventSNSTopic
+
+  LambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      Principal: sns.amazonaws.com
+      SourceArn: !Ref eventSNSTopic
+      FunctionName: !GetAtt trendEventForwarder.Arn
+
+  ExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: /
+      Policies:
+        -
+          PolicyName: "AllowSNSandConfigRead"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              # Cloudwatch logs for the function
+              -
+                Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                  - "logs:DescribeLogStreams"
+                Resource:
+                  - "*"
+
+  TrendDeepSecurityUser:
+    Type: "AWS::IAM::User"
+    Properties:
+      Policies:
+        - PolicyName: DSsnsPublish
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action:
+              - sns:Publish
+              - sns:GetTopicAttributes
+              - sns:ConfirmSubscription
+              - sns:Subscribe
+              Resource:
+              - !Ref eventSNSTopic
+            - Effect: Allow
+              Action:
+                - sns:Unsubscribe
+                - sns:GetSubscriptionAttributes
+              Resource:
+                - "*"
+      UserName: trend_deep_security_cfn
