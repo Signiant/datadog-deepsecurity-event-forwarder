@@ -5,13 +5,21 @@ Description: Lambda function which takes events from Deep Security and formats t
 Parameters:
   EventFilter:
     Type: String
-    Description: Comma seperated list of Deep Security event severities to send to Datadog (default is send all)
+    Description: Comma seperated list of Deep Security event severities to send to Datadog or the value all
+    Default: all
+  RankGreater:
+    Type: String
+    Description: Events ranked greater than this value will be sent to Datadog
+    Default: 0
   DatadogAPIKey:
     Type : 'AWS::SSM::Parameter::Value<String>'
     Description: Parameter store parameter that contains the Datadog API key
   DatadogAppKey:
     Type : 'AWS::SSM::Parameter::Value<String>'
     Description: Parameter store parameter that contains the Datadog Application key
+  DatadogTags:
+    Type : String
+    Description: Comma-seperated list of tag=value strings
 
 Resources:
   trendEventForwarder:
@@ -29,6 +37,8 @@ Resources:
           EventFilter: !Ref EventFilter
           DatadogAPIKey: !Ref DatadogAPIKey
           DatadogAppKey: !Ref DatadogAppKey
+          DatadogTags: !Ref DatadogTags
+          RankGreater: !Ref RankGreater
 
   eventSNSTopic:
     Type: "AWS::SNS::Topic"
