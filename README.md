@@ -64,7 +64,7 @@ aws cloudformation deploy \
 The function takes a few parameters to customize alert thresholds and add Datadog tags:
 
 * EventFilter - the keyword *all* to send all events or a commma seperated list of alert severities.  Only events matching one of the severities will be sent to Datadog
-* RankGreater - Any events greater than this rank will be send to Datadog.  Default is 0 (ie. send all ranked events)
+* RankGreater - Any events greater than this rank will be sent to Datadog.  Default is 0 (ie. send all ranked events)
 * DatadogAPIKey - Name of a parameter in AWS Parameter Store containing a valid Datadog API key
 * DatadogAppKey - Name of a parameter in AWS Parameter Store containing a valid Datadog app key
 * DatadogTags - comma-seperated list of tag names and values to apply to events sent to Datadog.  ie. env=prod,service=myservice,foo=bar
