@@ -76,7 +76,10 @@ def lambda_handler(event, context):
         print("Will only send DS events with rank > " + str(min_rank_to_send) + " to Datadog")
 
     # get the severity and rank from the event
-    current_rank = ds_event_dict['Rank']
+    if 'Rank' in ds_event_dict:
+        current_rank = ds_event_dict['Rank']
+    else:
+        current_rank = 0
 
     # Handle different event types
     if 'OSSEC_Level' in ds_event_dict:
@@ -87,11 +90,20 @@ def lambda_handler(event, context):
         # IPS events
         current_event_severity = ds_event_dict['Severity']
         current_event_description = ds_event_dict['Reason']
+    else:
+        current_event_severity = "N/A"
+
+        if 'reason' not in ds_event_dict:
+            current_event_description = "none"
 
     if current_rank >= min_rank_to_send:
         if 'all' in ds_event_levels_to_report or str(current_event_severity) in ds_event_levels_to_report:
             host = ds_event_dict['Hostname']
-            severity_string = ds_event_dict['SeverityString']
+
+            if 'SeverityString' in ds_event_dict:
+                severity_string = ds_event_dict['SeverityString']
+            else:
+                severity_string = "N/A"
 
             print("Level " + str(current_event_severity) + " DS event found with severity "
                            + severity_string + " and rank " + str(current_rank) + ". Sending to Datadog")
