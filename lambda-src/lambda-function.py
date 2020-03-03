@@ -1,10 +1,8 @@
-from __future__ import print_function
-
 import os
 import json
-import pprint
 from datadog import initialize, api
 from pprint import pprint, pformat
+
 
 def parse_tags(tag_str):
     '''
@@ -22,6 +20,7 @@ def parse_tags(tag_str):
         dd_formatted_tags.append(tag_name + ':' + tag_value)
 
     return dd_formatted_tags
+
 
 def send_datadog_event(priority, type, title, text):
     print("Sending Datadog event")

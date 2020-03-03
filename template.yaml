@@ -26,7 +26,7 @@ Resources:
     Type: 'AWS::Serverless::Function'
     Properties:
       Handler: lambda-function.lambda_handler
-      Runtime: python2.7
+      Runtime: python3.8
       CodeUri: ./lambda-src
       Description: Comma seperated list of Deep Security event severities to send to Datadog (default is send all)
       MemorySize: 128
